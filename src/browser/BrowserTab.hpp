@@ -22,6 +22,9 @@ public:
     /// Title suitable for the tab bar and window title.
     QString displayTitle() const;
 
+    /// Applies the JavaScript preference to this tab's page.
+    void setJavascriptEnabled(bool enabled);
+
     /// Used by createWindow() to open target="_blank" links in a new tab.
     void setWindowFactory(std::function<BrowserTab*()> factory);
 
@@ -29,6 +32,9 @@ protected:
     QWebEngineView* createWindow(QWebEnginePage::WebWindowType type) override;
 
 private:
+    void handlePermissionRequest(const QUrl& securityOrigin,
+                                 QWebEnginePage::Feature feature);
+
     std::function<BrowserTab*()> m_windowFactory;
 };
 

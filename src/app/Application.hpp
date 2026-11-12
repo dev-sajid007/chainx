@@ -32,12 +32,12 @@ public:
 
     static int run(int argc, char** argv);
 
-    BrowserWindow* createWindow();
+    BrowserWindow* createWindow(bool privateMode = false);
     QWebEngineProfile* profile() const;
 
 private:
     bool initialize();
-    void openInitialWindow();
+    void openInitialWindow(bool privateMode);
     static QString dataDirectory();
 
     std::unique_ptr<Database> m_database;
@@ -48,6 +48,7 @@ private:
     std::unique_ptr<Web3Provider> m_web3;
 
     QWebEngineProfile* m_profile = nullptr;
+    QList<QWebEngineProfile*> m_privateProfiles;
     QList<BrowserWindow*> m_windows;
 };
 

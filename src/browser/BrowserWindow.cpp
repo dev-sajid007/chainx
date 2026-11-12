@@ -23,6 +23,7 @@
 #include "browser/BrowserTab.hpp"
 #include "browser/BookmarkManagerDialog.hpp"
 #include "browser/HistoryDialog.hpp"
+#include "browser/PrivacyDialog.hpp"
 #include "browser/SettingsDialog.hpp"
 #include "navigation/AddressBar.hpp"
 #include "services/BookmarkService.hpp"
@@ -61,6 +62,7 @@ BrowserWindow::BrowserWindow(Settings& settings,
                              DownloadService& downloads,
                              Web3Provider& web3,
                              QWebEngineProfile* profile,
+                             bool privateMode,
                              QWidget* parent)
     : QMainWindow(parent)
     , m_settings(settings)
@@ -68,14 +70,16 @@ BrowserWindow::BrowserWindow(Settings& settings,
     , m_bookmarks(bookmarks)
     , m_downloads(downloads)
     , m_web3(web3)
+    , m_profile(profile)
+    , m_privateMode(privateMode)
 {
-    setWindowTitle(QStringLiteral("ChainX"));
+    setWindowTitle(m_privateMode ? tr("ChainX (Private)") : QStringLiteral("ChainX"));
     setWindowIcon(brandIcon());
     resize(1280, 820);
     setMinimumSize(640, 480);
 
     m_controller = new BrowserController(settings, history, bookmarks, downloads,
-                                         web3, profile, this);
+                                         web3, profile, privateMode, this);
 
     buildStatusBar();
     buildUi();
@@ -220,6 +224,18 @@ void BrowserWindow::buildToolBars()
 void BrowserWindow::buildMenus()
 {
     QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
+
+    QAction* newWindowAction = fileMenu->addAction(tr("New &Window"));
+    newWindowAction->setShortcut(QKeySequence(QStringLiteral("Ctrl+N")));
+    connect(newWindowAction, &QAction::triggered, this,
+            [this] { emit newWindowRequested(false); });
+
+    QAction* newPrivateWindowAction = fileMenu->addAction(tr("New &Private Window"));
+    newPrivateWindowAction->setShortcut(QKeySequence(QStringLiteral("Ctrl+Shift+N")));
+    connect(newPrivateWindowAction, &QAction::triggered, this,
+            [this] { emit newWindowRequested(true); });
+
+    fileMenu->addSeparator();
     fileMenu->addAction(m_controller->newTabAction());
     fileMenu->addAction(m_controller->closeTabAction());
     fileMenu->addAction(m_controller->duplicateTabAction());
@@ -295,6 +311,11 @@ void BrowserWindow::buildMenus()
     QAction* clearHistoryAction = historyMenu->addAction(tr("&Clear Browsing History…"));
     connect(clearHistoryAction, &QAction::triggered, this, &BrowserWindow::clearHistory);
 
+    QAction* clearDataAction = historyMenu->addAction(tr("Clear Browsing &Data…"));
+    clearDataAction->setShortcut(QKeySequence(QStringLiteral("Ctrl+Shift+Delete")));
+    connect(clearDataAction, &QAction::triggered,
+            this, &BrowserWindow::showPrivacyDialog);
+
     QMenu* helpMenu = menuBar()->addMenu(tr("&Help"));
     QAction* aboutAction = helpMenu->addAction(tr("&About ChainX"));
     connect(aboutAction, &QAction::triggered, this, &BrowserWindow::showAbout);
@@ -307,6 +328,16 @@ void BrowserWindow::buildStatusBar()
     m_statusLabel = new QLabel(this);
     m_statusLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
     statusBar()->addWidget(m_statusLabel, 1);
+
+    if (m_privateMode) {
+        m_privateBadge = new QLabel(tr("Private"), this);
+        m_privateBadge->setStyleSheet(QStringLiteral(
+            "QLabel { background: #eef0f6; color: #4a5162; border-radius: 8px;"
+            " padding: 2px 8px; font-weight: 600; font-size: 11px; }"));
+        m_privateBadge->setToolTip(
+            tr("This window does not save history, cookies or cache"));
+        statusBar()->addPermanentWidget(m_privateBadge);
+    }
 
     m_web3Label = new QLabel(tr("Web3"), this);
     m_web3Label->setStyleSheet(QStringLiteral(
@@ -328,15 +359,17 @@ void BrowserWindow::buildStatusBar()
 
 void BrowserWindow::updateForCurrentTab(BrowserTab* tab)
 {
+    const QString suffix = m_privateMode ? tr("ChainX (Private)") : tr("ChainX");
+
     if (!tab) {
         m_addressBar->setUrl(QUrl());
-        setWindowTitle(tr("ChainX"));
+        setWindowTitle(suffix);
         updateLoadingState(false);
         return;
     }
 
     m_addressBar->setUrl(tab->url());
-    setWindowTitle(tr("%1 — ChainX").arg(tab->displayTitle()));
+    setWindowTitle(tr("%1 — %2").arg(tab->displayTitle(), suffix));
     updateLoadingState(tab->page()->isLoading());
 }
 
@@ -392,6 +425,15 @@ void BrowserWindow::showBookmarkManager()
     dialog.exec();
 }
 
+void BrowserWindow::showPrivacyDialog()
+{
+    PrivacyDialog dialog(m_profile, m_history, m_downloads, this);
+    connect(&dialog, &PrivacyDialog::dataCleared, this, [this] {
+        m_statusLabel->setText(tr("Browsing data cleared"));
+    });
+    dialog.exec();
+}
+
 void BrowserWindow::showSettings()
 {
     SettingsDialog dialog(m_settings, this);
@@ -399,6 +441,7 @@ void BrowserWindow::showSettings()
         m_addressBar->setSearchTemplate(m_settings.searchEngineTemplate());
         setBookmarkToolBarVisible(
             m_settings.value(QStringLiteral("ui/bookmarkToolbarVisible"), true).toBool());
+        m_controller->applySettings();
         m_statusLabel->setText(tr("Settings saved"));
     });
     dialog.exec();

@@ -38,6 +38,10 @@ public:
     bool javascriptEnabled() const;
     void setJavascriptEnabled(bool enabled);
 
+    /// Blocks HTTP content loaded inside HTTPS pages (mixed content).
+    bool blockInsecureContent() const;
+    void setBlockInsecureContent(bool enabled);
+
     QVariant value(const QString& key, const QVariant& fallback = {}) const;
     void setValue(const QString& key, const QVariant& value);
 

@@ -79,7 +79,7 @@ QString UrlUtils::displayString(const QUrl& url)
     if (isNewTabPage(url)) {
         return {};
     }
-    return url.toString(QUrl::RemovePassword | QUrl::FullyDecoded);
+    return url.toDisplayString(QUrl::RemovePassword);
 }
 
 QString UrlUtils::searchUrl(const QString& query, const QString& searchTemplate)

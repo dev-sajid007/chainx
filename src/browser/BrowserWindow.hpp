@@ -39,9 +39,13 @@ public:
                   DownloadService& downloads,
                   Web3Provider& web3,
                   QWebEngineProfile* profile,
+                  bool privateMode = false,
                   QWidget* parent = nullptr);
 
     BrowserController* controller() const;
+
+signals:
+    void newWindowRequested(bool privateMode);
 
 protected:
     void closeEvent(QCloseEvent* event) override;
@@ -58,6 +62,7 @@ private:
     void updateWeb3Badge(bool detected);
     void showHistoryDialog();
     void showBookmarkManager();
+    void showPrivacyDialog();
     void showSettings();
     void rebuildBookmarkMenu();
     void rebuildBookmarkToolBar();
@@ -77,6 +82,8 @@ private:
     BookmarkService& m_bookmarks;
     DownloadService& m_downloads;
     Web3Provider& m_web3;
+    QWebEngineProfile* m_profile = nullptr;
+    bool m_privateMode = false;
 
     BrowserController* m_controller = nullptr;
 
@@ -90,6 +97,7 @@ private:
 
     QLabel* m_statusLabel = nullptr;
     QLabel* m_web3Label = nullptr;
+    QLabel* m_privateBadge = nullptr;
     QProgressBar* m_progressBar = nullptr;
 
     QAction* m_bookmarkToolBarAction = nullptr;

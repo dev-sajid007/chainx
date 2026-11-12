@@ -36,9 +36,15 @@ public:
                       DownloadService& downloads,
                       Web3Provider& web3,
                       QWebEngineProfile* profile,
+                      bool privateMode = false,
                       QObject* parent = nullptr);
 
     QTabWidget* tabWidget() const;
+
+    bool isPrivate() const;
+
+    /// Re-applies preference-backed settings to every open tab.
+    void applySettings();
 
     BrowserTab* createTab(const QUrl& url = QUrl(), bool foreground = true);
     BrowserTab* currentTab() const;
@@ -101,6 +107,7 @@ private:
     DownloadService& m_downloads;
     Web3Provider& m_web3;
     QWebEngineProfile* m_profile = nullptr;
+    bool m_privateMode = false;
 
     QTabWidget* m_tabWidget = nullptr;
     QList<BrowserTab*> m_tabs;

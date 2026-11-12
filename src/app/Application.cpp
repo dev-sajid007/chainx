@@ -46,23 +46,46 @@ int Application::run(int argc, char** argv)
         return 1;
     }
 
-    app.openInitialWindow();
+    const bool privateWindow =
+        QCoreApplication::arguments().contains(QStringLiteral("--private"));
+    app.openInitialWindow(privateWindow);
     return app.exec();
 }
 
-BrowserWindow* Application::createWindow()
+BrowserWindow* Application::createWindow(bool privateMode)
 {
+    QWebEngineProfile* profile = m_profile;
+    if (privateMode) {
+        // No storage name means an off-the-record profile: cookies, cache and
+        // history live in memory and disappear when the last tab closes.
+        profile = new QWebEngineProfile(this);
+        profile->setHttpCacheType(QWebEngineProfile::MemoryHttpCache);
+        profile->setPersistentCookiesPolicy(QWebEngineProfile::NoPersistentCookies);
+        profile->setDownloadPath(m_settings->downloadDirectory());
+        m_privateProfiles.append(profile);
+        m_downloads->attachProfile(profile, false);
+    }
+
     auto* window = new BrowserWindow(*m_settings,
                                      *m_history,
                                      *m_bookmarks,
                                      *m_downloads,
                                      *m_web3,
-                                     m_profile);
+                                     profile,
+                                     privateMode);
     m_windows.append(window);
 
-    connect(window, &QObject::destroyed, this, [this, window] {
-        m_windows.removeAll(window);
-    });
+    connect(window, &BrowserWindow::newWindowRequested,
+            this, [this](bool wantsPrivate) { createWindow(wantsPrivate); });
+
+    connect(window, &QObject::destroyed, this,
+            [this, window, profile, privateMode] {
+                m_windows.removeAll(window);
+                if (privateMode && profile) {
+                    m_privateProfiles.removeAll(profile);
+                    profile->deleteLater();
+                }
+            });
 
     window->show();
     return window;
@@ -130,9 +153,9 @@ bool Application::initialize()
     return true;
 }
 
-void Application::openInitialWindow()
+void Application::openInitialWindow(bool privateMode)
 {
-    createWindow();
+    createWindow(privateMode);
 }
 
 QString Application::dataDirectory()

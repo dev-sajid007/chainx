@@ -38,12 +38,17 @@ public:
     DownloadService(Database& database, Settings& settings, QObject* parent = nullptr);
 
     /// Starts listening for download requests from the given profile.
-    void attachProfile(QWebEngineProfile* profile);
+    /// When @p persistent is false (private browsing), the download is handled
+    /// but not written to the persistent download list.
+    void attachProfile(QWebEngineProfile* profile, bool persistent = true);
 
     QString downloadDirectory() const;
     void setDownloadDirectory(const QString& directory);
 
     QList<DownloadRecord> downloads(int limit = 100) const;
+
+    /// Removes finished downloads from the persistent history.
+    bool clearHistory();
 
     bool openFile(qint64 id) const;
     bool showInFolder(qint64 id) const;
@@ -55,7 +60,7 @@ public:
     static QString statusToString(QWebEngineDownloadRequest::DownloadState state);
 
 public slots:
-    void handleDownload(QWebEngineDownloadRequest* request);
+    void handleDownload(QWebEngineDownloadRequest* request, bool persistent = true);
     void cancelDownload(qint64 id);
     void pauseDownload(qint64 id);
     void resumeDownload(qint64 id);
@@ -84,6 +89,7 @@ private:
     Settings& m_settings;
     QHash<QWebEngineDownloadRequest*, qint64> m_idsByRequest;
     QHash<qint64, QWebEngineDownloadRequest*> m_requestsById;
+    qint64 m_nextEphemeralId = -1;
 };
 
 } // namespace chainx

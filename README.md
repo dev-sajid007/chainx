@@ -9,8 +9,9 @@ security model described in [`spec.md`](spec.md) has been validated.
 
 ## Status
 
-Milestone 01 (browser foundation), Milestone 02 (tab management) and
-Milestone 03 (browser services) are implemented:
+Milestone 01 (browser foundation), Milestone 02 (tab management),
+Milestone 03 (browser services) and Milestone 04 (privacy & security) are
+implemented:
 
 - Chromium rendering via Qt WebEngine
 - Multi-tab browsing with duplicate / reopen-closed-tab support
@@ -21,6 +22,10 @@ Milestone 03 (browser services) are implemented:
 - Settings page: homepage, search engine, download folder, history retention
 - Browsing history (SQLite-backed) with search, per-entry delete and retention
 - Download manager backed by Qt WebEngine, with progress in the status bar
+- Private browsing windows backed by an off-the-record profile
+- Clear browsing data: history, downloads, cookies and cache
+- Permission prompts for camera, microphone, location and notifications
+- JavaScript and insecure-content controls
 - Built-in new tab page
 - Web3 provider *detection* only (`window.ethereum`), disabled by design
 - Unit tests (GoogleTest) for URL handling and persistence
@@ -64,6 +69,12 @@ Run:
 ./build/chainx-browser
 ```
 
+Start with a private window:
+
+```bash
+./build/chainx-browser --private
+```
+
 Run the tests:
 
 ```bash
@@ -83,6 +94,8 @@ sudo apt install ./chainx-browser_1.0.0_amd64.deb
 
 | Shortcut | Action |
 |---|---|
+| `Ctrl+N` | New window |
+| `Ctrl+Shift+N` | New private window |
 | `Ctrl+T` | New tab |
 | `Ctrl+W` | Close tab |
 | `Ctrl+Shift+T` | Reopen closed tab |
@@ -93,6 +106,7 @@ sudo apt install ./chainx-browser_1.0.0_amd64.deb
 | `Ctrl+Shift+O` | Manage bookmarks |
 | `Ctrl+H` | History |
 | `Ctrl+,` | Settings |
+| `Ctrl+Shift+Delete` | Clear browsing data |
 | `Alt+Left` / `Alt+Right` | Back / forward |
 | `Ctrl+R` / `F5` | Reload |
 | `Ctrl+.` | Stop loading |
@@ -107,6 +121,9 @@ ChainX follows the XDG base directory specification:
 - Database and profile: `~/.local/share/ChainX/ChainX/`
 - Settings: `~/.config/ChainX/ChainX.ini`
 - Logs: `~/.local/share/ChainX/ChainX/chainx.log`
+
+Private windows use an in-memory profile: cookies, cache, history and their
+download list are discarded when the window closes.
 
 ## Project layout
 

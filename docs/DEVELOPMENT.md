@@ -67,10 +67,10 @@ in-memory database, so they never touch user data.
 | 01 — Browser foundation | Done |
 | 02 — Tab management | Done |
 | 03 — Browser services | Done |
-| 04 — Privacy & security | Pending |
+| 04 — Privacy & security | Done |
 | 05 — Web3 integration | Detection only |
 | 06 — Production release | Packaging scaffolded |
 
-The next planned work is Milestone 04: private browsing windows backed by an
-off-the-record profile, cookie and cache management, and permission handling for
-camera, microphone, geolocation and notifications.
+The next planned work is Milestone 05 (Web3 provider hardening) and
+Milestone 06: packaging for Windows/macOS, more automated tests and
+performance work.

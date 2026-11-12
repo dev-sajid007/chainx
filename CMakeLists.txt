@@ -37,6 +37,8 @@ set(CHAINX_CORE_SOURCES
     src/browser/BookmarkManagerDialog.hpp
     src/browser/HistoryDialog.cpp
     src/browser/HistoryDialog.hpp
+    src/browser/PrivacyDialog.cpp
+    src/browser/PrivacyDialog.hpp
     src/browser/SettingsDialog.cpp
     src/browser/SettingsDialog.hpp
 

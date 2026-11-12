@@ -73,6 +73,23 @@ and mirrors state changes into SQLite. Active requests are tracked in memory so
 the UI can cancel, pause or resume them. Downloads left running when the process
 exits are reconciled to `interrupted` on the next start.
 
+## Privacy
+
+Persistent windows share the named `chainx` profile. Private windows
+(`Ctrl+Shift+N` or `--private`) get an off-the-record `QWebEngineProfile` created
+per window; the profile is deleted when the window closes, discarding cookies,
+cache and site data. `BrowserController` skips history recording in private
+mode, and `DownloadService` keeps private-profile downloads in memory without
+writing them to the download history.
+
+`BrowserTab` answers `QWebEnginePage::featurePermissionRequested` with an
+explicit Allow/Block prompt for camera, microphone, geolocation, notifications
+and related features. JavaScript and mixed-content blocking are applied from
+`Settings` to existing and new tabs through `BrowserController::applySettings()`.
+
+`PrivacyDialog` clears browsing history, download history, cookies and the HTTP
+cache for the current profile.
+
 ## Web3
 
 `Web3Provider::isEnabled()` always returns `false` in v1.0.0. ChainX only probes

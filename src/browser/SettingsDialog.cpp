@@ -89,6 +89,13 @@ void SettingsDialog::buildUi()
     m_bookmarkBar = new QCheckBox(tr("Show the bookmarks bar"), this);
     form->addRow(QString(), m_bookmarkBar);
 
+    m_javascript = new QCheckBox(tr("Enable JavaScript"), this);
+    form->addRow(QString(), m_javascript);
+
+    m_blockInsecureContent =
+        new QCheckBox(tr("Block insecure content on secure pages"), this);
+    form->addRow(QString(), m_blockInsecureContent);
+
     layout->addLayout(form);
 
     auto* hint = new QLabel(
@@ -123,6 +130,8 @@ void SettingsDialog::loadFromSettings()
     m_historyRetention->setValue(m_settings.historyRetentionDays());
     m_bookmarkBar->setChecked(
         m_settings.value(QString::fromLatin1(kBookmarkBarKey), true).toBool());
+    m_javascript->setChecked(m_settings.javascriptEnabled());
+    m_blockInsecureContent->setChecked(m_settings.blockInsecureContent());
 
     const QString templ = m_settings.searchEngineTemplate();
     m_searchTemplate->setText(templ);
@@ -192,6 +201,8 @@ void SettingsDialog::apply()
     m_settings.setDownloadDirectory(downloadDirectory);
     m_settings.setHistoryRetentionDays(m_historyRetention->value());
     m_settings.setValue(QString::fromLatin1(kBookmarkBarKey), m_bookmarkBar->isChecked());
+    m_settings.setJavascriptEnabled(m_javascript->isChecked());
+    m_settings.setBlockInsecureContent(m_blockInsecureContent->isChecked());
     m_settings.sync();
 
     emit settingsChanged();

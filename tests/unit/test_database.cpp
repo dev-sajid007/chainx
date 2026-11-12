@@ -5,11 +5,15 @@
 
 #include "database/Database.hpp"
 #include "services/BookmarkService.hpp"
+#include "services/DownloadService.hpp"
 #include "services/HistoryService.hpp"
+#include "settings/Settings.hpp"
 
 using chainx::BookmarkService;
 using chainx::Database;
+using chainx::DownloadService;
 using chainx::HistoryService;
+using chainx::Settings;
 
 namespace {
 
@@ -134,6 +138,35 @@ TEST(BookmarkServiceTest, CreatesFolders)
         }
     }
     EXPECT_TRUE(found);
+}
+
+TEST(DownloadServiceTest, ClearHistoryKeepsActiveDownloads)
+{
+    Database database(QStringLiteral(":memory:"));
+    ASSERT_TRUE(database.open());
+
+    Settings settings;
+    DownloadService downloads(database, settings);
+
+    QSqlQuery query(database.connection());
+    ASSERT_TRUE(query.exec(QStringLiteral(
+        "INSERT INTO downloads "
+        "(filename, url, file_path, total_size, downloaded_size, status, created_at) "
+        "VALUES ('done.zip', 'https://example.com/done.zip', '/tmp/done.zip', "
+        "10, 10, 'completed', 0)")));
+    ASSERT_TRUE(query.exec(QStringLiteral(
+        "INSERT INTO downloads "
+        "(filename, url, file_path, total_size, downloaded_size, status, created_at) "
+        "VALUES ('active.zip', 'https://example.com/active.zip', '/tmp/active.zip', "
+        "10, 2, 'in_progress', 0)")));
+
+    EXPECT_EQ(downloads.downloads().size(), 2);
+    ASSERT_TRUE(downloads.clearHistory());
+
+    const QList<chainx::DownloadRecord> remaining = downloads.downloads();
+    ASSERT_EQ(remaining.size(), 1);
+    EXPECT_EQ(remaining.first().filename, QStringLiteral("active.zip"));
+    EXPECT_EQ(remaining.first().status, QStringLiteral("in_progress"));
 }
 
 TEST(BookmarkServiceTest, UpdatesMovesAndRemovesFolders)

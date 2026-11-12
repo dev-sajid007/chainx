@@ -7,6 +7,7 @@
 #include <QWebEngineHistory>
 #include <QWebEnginePage>
 #include <QWebEngineProfile>
+#include <QWebEngineSettings>
 
 #include "browser/BrowserTab.hpp"
 #include "services/BookmarkService.hpp"
@@ -29,6 +30,7 @@ BrowserController::BrowserController(Settings& settings,
                                      DownloadService& downloads,
                                      Web3Provider& web3,
                                      QWebEngineProfile* profile,
+                                     bool privateMode,
                                      QObject* parent)
     : QObject(parent)
     , m_settings(settings)
@@ -37,6 +39,7 @@ BrowserController::BrowserController(Settings& settings,
     , m_downloads(downloads)
     , m_web3(web3)
     , m_profile(profile)
+    , m_privateMode(privateMode)
 {
     m_tabWidget = new QTabWidget();
     m_tabWidget->setObjectName(QStringLiteral("tabWidget"));
@@ -134,6 +137,26 @@ BrowserController::BrowserController(Settings& settings,
 QTabWidget* BrowserController::tabWidget() const
 {
     return m_tabWidget;
+}
+
+bool BrowserController::isPrivate() const
+{
+    return m_privateMode;
+}
+
+void BrowserController::applySettings()
+{
+    const bool javascript = m_settings.javascriptEnabled();
+    const bool blockInsecure = m_settings.blockInsecureContent();
+
+    for (BrowserTab* tab : m_tabs) {
+        if (!tab || !tab->page()) {
+            continue;
+        }
+        tab->setJavascriptEnabled(javascript);
+        tab->page()->settings()->setAttribute(
+            QWebEngineSettings::AllowRunningInsecureContent, !blockInsecure);
+    }
 }
 
 BrowserTab* BrowserController::createTab(const QUrl& url, bool foreground)
@@ -364,6 +387,10 @@ BrowserTab* BrowserController::makeTab()
 {
     auto* tab = new BrowserTab(m_profile, m_tabWidget);
     tab->setWindowFactory([this] { return createTab(QUrl(), true); });
+    tab->setJavascriptEnabled(m_settings.javascriptEnabled());
+    tab->page()->settings()->setAttribute(
+        QWebEngineSettings::AllowRunningInsecureContent,
+        !m_settings.blockInsecureContent());
     wireTab(tab);
 
     m_tabs.append(tab);
@@ -483,7 +510,7 @@ void BrowserController::onCurrentTabChanged(int index)
 
 void BrowserController::recordHistory(BrowserTab* tab)
 {
-    if (!tab) {
+    if (!tab || m_privateMode) {
         return;
     }
 

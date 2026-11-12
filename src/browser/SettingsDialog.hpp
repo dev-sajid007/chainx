@@ -41,6 +41,8 @@ private:
     QLineEdit* m_downloadDirectory = nullptr;
     QSpinBox* m_historyRetention = nullptr;
     QCheckBox* m_bookmarkBar = nullptr;
+    QCheckBox* m_javascript = nullptr;
+    QCheckBox* m_blockInsecureContent = nullptr;
 };
 
 } // namespace chainx

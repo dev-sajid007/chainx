@@ -52,7 +52,7 @@ DownloadService::DownloadService(Database& database, Settings& settings, QObject
 {
 }
 
-void DownloadService::attachProfile(QWebEngineProfile* profile)
+void DownloadService::attachProfile(QWebEngineProfile* profile, bool persistent)
 {
     if (!profile) {
         return;
@@ -60,7 +60,9 @@ void DownloadService::attachProfile(QWebEngineProfile* profile)
 
     profile->setDownloadPath(downloadDirectory());
     connect(profile, &QWebEngineProfile::downloadRequested,
-            this, &DownloadService::handleDownload);
+            this, [this, persistent](QWebEngineDownloadRequest* request) {
+                handleDownload(request, persistent);
+            });
 }
 
 QString DownloadService::downloadDirectory() const
@@ -103,6 +105,19 @@ QList<DownloadRecord> DownloadService::downloads(int limit) const
     }
 
     return records;
+}
+
+bool DownloadService::clearHistory()
+{
+    QSqlQuery query(m_database.connection());
+    if (!query.exec(QStringLiteral(
+            "DELETE FROM downloads "
+            "WHERE status NOT IN ('requested', 'in_progress')"))) {
+        qWarning() << "Failed to clear download history:" << query.lastError().text();
+        return false;
+    }
+    emit downloadsChanged();
+    return true;
 }
 
 bool DownloadService::openFile(qint64 id) const
@@ -168,7 +183,7 @@ QString DownloadService::statusToString(QWebEngineDownloadRequest::DownloadState
     return QStringLiteral("unknown");
 }
 
-void DownloadService::handleDownload(QWebEngineDownloadRequest* request)
+void DownloadService::handleDownload(QWebEngineDownloadRequest* request, bool persistent)
 {
     if (!request) {
         return;
@@ -192,16 +207,22 @@ void DownloadService::handleDownload(QWebEngineDownloadRequest* request)
     request->setDownloadDirectory(directory);
     request->setDownloadFileName(QFileInfo(target).fileName());
 
-    const qint64 id = insertRecord(QFileInfo(target).fileName(),
-                                   request->url().toString(),
-                                   target,
-                                   request->totalBytes(),
-                                   0,
-                                   QStringLiteral("requested"));
-    if (id < 0) {
-        qWarning() << "Refusing download: could not record it";
-        request->cancel();
-        return;
+    qint64 id = -1;
+    if (persistent) {
+        id = insertRecord(QFileInfo(target).fileName(),
+                          request->url().toString(),
+                          target,
+                          request->totalBytes(),
+                          0,
+                          QStringLiteral("requested"));
+        if (id < 0) {
+            qWarning() << "Refusing download: could not record it";
+            request->cancel();
+            return;
+        }
+    } else {
+        // Private profiles keep download state in memory only.
+        id = m_nextEphemeralId--;
     }
 
     m_idsByRequest.insert(request, id);
@@ -214,12 +235,14 @@ void DownloadService::handleDownload(QWebEngineDownloadRequest* request)
 
     connect(request, &QWebEngineDownloadRequest::stateChanged,
             this, [this, request, id](QWebEngineDownloadRequest::DownloadState state) {
-                updateRecord(id,
-                             request->totalBytes(),
-                             request->receivedBytes(),
-                             statusToString(state),
-                             QDir(request->downloadDirectory())
-                                 .filePath(request->downloadFileName()));
+                if (id > 0) {
+                    updateRecord(id,
+                                 request->totalBytes(),
+                                 request->receivedBytes(),
+                                 statusToString(state),
+                                 QDir(request->downloadDirectory())
+                                     .filePath(request->downloadFileName()));
+                }
 
                 if (isFinalState(state)) {
                     finishDownload(id, request);

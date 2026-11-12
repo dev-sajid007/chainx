@@ -14,6 +14,7 @@ constexpr auto kDownloadDirectory = "downloads/directory";
 constexpr auto kHistoryRetention = "history/retentionDays";
 constexpr auto kRestoreSession = "browser/restoreSession";
 constexpr auto kJavascript = "privacy/javascriptEnabled";
+constexpr auto kBlockInsecureContent = "privacy/blockInsecureContent";
 
 } // namespace
 
@@ -95,6 +96,16 @@ bool Settings::javascriptEnabled() const
 void Settings::setJavascriptEnabled(bool enabled)
 {
     m_settings.setValue(QString::fromLatin1(kJavascript), enabled);
+}
+
+bool Settings::blockInsecureContent() const
+{
+    return m_settings.value(QString::fromLatin1(kBlockInsecureContent), true).toBool();
+}
+
+void Settings::setBlockInsecureContent(bool enabled)
+{
+    m_settings.setValue(QString::fromLatin1(kBlockInsecureContent), enabled);
 }
 
 QVariant Settings::value(const QString& key, const QVariant& fallback) const
