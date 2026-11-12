@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=ChainX Browser
+GenericName=Web Browser
+Comment=Privacy-focused Chromium browser with a Web3 foundation
+Exec=chainx-browser %U
+Icon=chainx-browser
+Terminal=false
+Categories=Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;
+StartupNotify=true
+StartupWMClass=chainx-browser

@@ -1,0 +1,26 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/">
+        <file>styles/chainx.qss</file>
+        <file>pages/newtab.html</file>
+        <file>icons/back.svg</file>
+        <file>icons/forward.svg</file>
+        <file>icons/reload.svg</file>
+        <file>icons/stop.svg</file>
+        <file>icons/home.svg</file>
+        <file>icons/newtab.svg</file>
+        <file>icons/star.svg</file>
+        <file>icons/star-filled.svg</file>
+        <file>icons/download.svg</file>
+        <file>icons/history.svg</file>
+        <file>icons/chainx.svg</file>
+        <file>icons/branding/chainx-16.png</file>
+        <file>icons/branding/chainx-24.png</file>
+        <file>icons/branding/chainx-32.png</file>
+        <file>icons/branding/chainx-48.png</file>
+        <file>icons/branding/chainx-64.png</file>
+        <file>icons/branding/chainx-128.png</file>
+        <file>icons/branding/chainx-256.png</file>
+        <file>icons/branding/chainx-512.png</file>
+    </qresource>
+</RCC>

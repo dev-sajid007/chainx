@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New Tab</title>
+<style>
+  :root {
+    --accent: #5b7cfa;
+    --accent-dark: #4d6ef0;
+    --text: #1d2333;
+    --muted: #7a8398;
+    --surface: #ffffff;
+    --border: #e2e6ef;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(1100px 520px at 15% -10%, #e8edff 0%, transparent 60%),
+      radial-gradient(900px 460px at 95% 0%, #f2e9ff 0%, transparent 55%),
+      #f7f9fc;
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-user-select: none;
+  }
+
+  main {
+    width: min(680px, 88vw);
+    text-align: center;
+    padding-bottom: 8vh;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+
+  .mark {
+    width: 52px;
+    height: 52px;
+    border-radius: 13px;
+    display: block;
+    box-shadow: 0 8px 22px rgba(18, 20, 26, 0.35);
+  }
+
+  .tagline {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 34px;
+  }
+
+  form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+  }
+
+  input[type="text"] {
+    flex: 1;
+    height: 50px;
+    padding: 0 18px;
+    font-size: 15px;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    outline: none;
+    box-shadow: 0 6px 18px rgba(29, 35, 51, 0.05);
+  }
+
+  input[type="text"]:focus {
+    border-color: #a9b9ff;
+    box-shadow: 0 6px 20px rgba(91, 124, 250, 0.18);
+  }
+
+  button {
+    height: 50px;
+    padding: 0 22px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #ffffff;
+    background: linear-gradient(135deg, #5b7cfa, #7a6bff);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(91, 124, 250, 0.28);
+  }
+
+  button:hover { filter: brightness(1.05); }
+
+  .shortcuts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+  }
+
+  .shortcut {
+    display: block;
+    padding: 16px 12px;
+    text-decoration: none;
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  .shortcut:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(29, 35, 51, 0.08);
+  }
+
+  .shortcut .glyph {
+    display: block;
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+
+  footer {
+    position: fixed;
+    bottom: 18px;
+    width: 100%;
+    text-align: center;
+    font-size: 12px;
+    color: #a3aabd;
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">
+    <img class="mark" src="qrc:/icons/branding/chainx-64.png" alt="ChainX">
+    ChainX
+  </div>
+  <div class="tagline">A fast, privacy-focused browser with a Web3 foundation.</div>
+
+  <form action="https://duckduckgo.com/" method="get">
+    <input type="text" name="q" placeholder="Search the web or enter an address" autocomplete="off" spellcheck="false">
+    <button type="submit">Search</button>
+  </form>
+
+  <div class="shortcuts">
+    <a class="shortcut" href="https://github.com/"><span class="glyph">&#128025;</span>GitHub</a>
+    <a class="shortcut" href="https://duckduckgo.com/"><span class="glyph">&#128269;</span>DuckDuckGo</a>
+    <a class="shortcut" href="https://developer.mozilla.org/"><span class="glyph">&#128214;</span>MDN Docs</a>
+    <a class="shortcut" href="https://en.wikipedia.org/"><span class="glyph">&#127760;</span>Wikipedia</a>
+  </div>
+</main>
+<footer>ChainX Browser &mdash; Chromium inside, privacy first.</footer>
+</body>
+</html>

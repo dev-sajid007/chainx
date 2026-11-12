@@ -1,0 +1,24 @@
+# Build output
+build/
+build-*/
+cmake-build-*/
+
+# CMake / CPack
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CPackConfig.cmake
+CPackSourceConfig.cmake
+_CPack_Packages/
+*.deb
+
+# IDE
+.vscode/
+.idea/
+*.user
+compile_commands.json
+
+# Runtime data
+*.log
+*.db
+*.db-journal
